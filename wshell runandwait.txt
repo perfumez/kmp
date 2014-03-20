@@ -1,0 +1,44 @@
+// integer of_RunAndWait( string as_run, integer ai_state, boolean ab_wait, ref string as_Result )
+CONSTANT integer MAXIMIZED = 3
+CONSTANT integer MINIMIZED = 2
+CONSTANT integer NORMAL = 1
+CONSTANT integer HIDE = 0
+integer i_rtn = 1
+String ls_Run
+OleObject wsh
+if Right(as_run, 3) = 'exe' or &
+ Right(as_run, 3) = 'com' or &
+ Right(as_run, 3) = 'cmd' or &
+ Right(as_run, 3) = 'bat' then
+ ls_Run = as_run
+else
+ as_Result = "실행 명령이 아닙니다."
+ i_rtn = -1
+end if
+if i_rtn >= 0 then
+ wsh = CREATE OleObject
+ i_rtn = wsh.ConnectToNewObject( "WScript.Shell" )// 성공 0
+ choose case i_rtn
+  case 0
+   choose case ai_state
+   case 1    ; i_rtn = wsh.Run(ls_Run, NORMAL   , ab_wait)
+   case 2   ; i_rtn = wsh.Run(ls_Run, MINIMIZED, ab_wait)// 성공 0
+   case 3   ; i_rtn = wsh.Run(ls_Run, MAXIMIZED, ab_wait)
+   case else ; i_rtn = wsh.Run(ls_Run, HIDE     , ab_wait)
+   end choose
+  case -1 ; as_Result = "Invalid Call: the argument is the Object property of a control"
+  case -2 ; as_Result = "Class name not found"
+  case -3 ; as_Result = "Object could not be created"
+  case -4 ; as_Result = "Could not connect to object"
+  case -9 ; as_Result = "Other error"
+  case -15 ; as_Result = "COM+ is not loaded on this computer"
+  case -16 ; as_Result = "Invalid Call: this function not applicable"
+  case else; as_Result = "ConnectToNewObject CREATE Error"
+ end choose
+ destroy wsh
+end if
+return i_rtn
+// ab_wait = true 경우에 파워빌더 다른 작업을 할수 있습니다.
+// Return 값이 0이 반환될때까지 프로그램을 종료 할수 없습니다.
+
+
